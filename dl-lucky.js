@@ -11,7 +11,7 @@ module.exports = function (youtubeUrl, args, options) {
                     if (!error && response.statusCode == 200) {
                         res.send("<style>body{margin:0;padding:0}</style>"
                             + "<iframe style='width:100%;height:100%;margin:0' frameborder='0' allowfullscreen='allowfullscreen' "
-                            + "src='" + info.url +"'/>");
+                            + "src='" + info.url.replace("requiressl=yes","requiressl=no") +"'/>");
                     } else {
                         console.log("bad lucky :(")
                         dl_normal(youtubeUrl, args, options)(res);
