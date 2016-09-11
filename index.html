@@ -2,15 +2,19 @@
 
 <head>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
     <style>
-        .video_title{display:block}
+        .video_title{display:table}
         video{width:100%!important;height:auto!important;}
     </style>
     <script>
             function searchVideos(text, append){
+                $(".search_more").remove()
+                if(!append){
+                    $("#results").html("");
+                    $("#pageToken").val("")
+                }
                 $.ajax({
                     url: "search",
                     data: {
@@ -18,10 +22,6 @@
                         pageToken: $("#pageToken").val()
                     },
                     success: function(data) {
-                        console.log(data);
-                        $(".search_more").remove()
-                        if(!append)
-                            $("#results").html("");
                         for(var i in data.items){
                             var item = data.items[i];
                             var elem = $("<a class='video_title'>");

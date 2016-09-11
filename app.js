@@ -40,8 +40,6 @@ app.get('/watch', function (req, res) {
     } else {
         var video = youtubedl(youtubeUrl, args, options);
         
-        var file = null;
-        
         // Will be called when the download starts. 
         video.on('info', function(info) {
             console.log('Download started');
@@ -55,18 +53,13 @@ app.get('/watch', function (req, res) {
         });
         video.on('end', function() {
             console.log('finished downloading!');
-            
-            
             //res.sendFile(file.path, { root: __dirname })
         });
-    
         res.writeHead(200,{
-            'Content-type': 'video/webm'
+            'Content-type': 'video/mp4'
         });
         video.pipe(res);
     }
-    
-   
 });
 
 
