@@ -28,38 +28,26 @@ app.get('/watch', function (req, res) {
     // Additional options can be given for calling `child_process.execFile()`. 
     var options = { cwd: __dirname };
                         
-    var fs = require('fs');
     var youtubedl = require('youtube-dl');
+    var dl_normal = require('./dl-normal');
     
     if(tryWithLucky){
         youtubedl.getInfo(youtubeUrl, args, options, 
             function(error, info){
-                res.send("<style>body{margin:0;padding:0}</style>"
-                        + "<iframe style='width:100%;height:100%;margin:0' frameborder='0' allowfullscreen='allowfullscreen' "
-                        + "src='" + info.url +"'/>");
+                request({method: 'HEAD',url: info.url}, function (error, response, body) {
+                    console.log("veryfing lucky")
+                    if (!error && response.statusCode == 200) {
+                        res.send("<style>body{margin:0;padding:0}</style>"
+                            + "<iframe style='width:100%;height:100%;margin:0' frameborder='0' allowfullscreen='allowfullscreen' "
+                            + "src='" + info.url +"'/>");
+                    } else {
+                        console.log("bad lucky :(")
+                        dl_normal(youtubeUrl, args, options)(res);
+                    }
+                });
             })
     } else {
-        var video = youtubedl(youtubeUrl, args, options);
-        
-        // Will be called when the download starts. 
-        video.on('info', function(info) {
-            console.log('Download started');
-            console.log('filename: ' + info._filename);
-            console.log('size: ' + info.size);
-            console.log('ext: ' + info.ext);
-            if(false && file === null){
-                file = fs.createWriteStream(videoId+".mp4")
-                video.pipe(file);
-            }
-        });
-        video.on('end', function() {
-            console.log('finished downloading!');
-            //res.sendFile(file.path, { root: __dirname })
-        });
-        res.writeHead(200,{
-            'Content-type': 'video/mp4'
-        });
-        video.pipe(res);
+        dl_normal(youtubeUrl, args, options)(res);
     }
 });
 
