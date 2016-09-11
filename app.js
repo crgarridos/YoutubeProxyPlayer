@@ -68,7 +68,7 @@ app.get('/search', function (req, res) {
     var disableReduce = req.query.disableReduce !== undefined
                         && req.query.disableReduce != "false";
     youTube.addParam("pageToken", req.query.pageToken)
-    youTube.search({ q: req.query.q}, 20, function(error, result) {
+    youTube.search(req.query.q, 20, function(error, result) {
     if (error) {
         console.log(error);
     }
