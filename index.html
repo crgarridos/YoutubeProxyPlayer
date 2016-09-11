@@ -10,15 +10,18 @@
         video{width:100%!important;height:auto!important;}
     </style>
     <script>
-            function searchVideos(text){
+            function searchVideos(text, append){
                 $.ajax({
                     url: "search",
                     data: {
-                        q: text
+                        q: text,
+                        pageToken: $("#pageToken").val()
                     },
                     success: function(data) {
                         console.log(data);
-                        $("#results").html("");
+                        $(".search_more").remove()
+                        if(!append)
+                            $("#results").html("");
                         for(var i in data.items){
                             var item = data.items[i];
                             var elem = $("<a class='video_title'>");
@@ -27,6 +30,15 @@
                             elem.html(item.title)
                             $("#results").append(elem)
                         }
+                        $("#pageToken").val(data.nextPageToken);
+                        $(".search_more").remove()
+                        var elem = $("<a class='video_title search_more'>");
+                        elem.attr("href", "javascript:void(0);")
+                        elem.html("More...")
+                        elem.click(function(){
+                            searchVideos($("#search").val(), true);
+                        });
+                        $("#results").append(elem)
                     }
                 })
             }
@@ -60,10 +72,9 @@
             $("#lucky").change(function() {
                 var check = this;
                 $(".video_title").each(function(index){
-                    console.log(this)
                     this.href = check.checked
                             ? this.href + "&lucky"
-                            : this.href.replace(/&lucky$/,"");
+                            : this.href.replace(/&lucky/g,"");
                 })
             });
 
@@ -76,7 +87,8 @@
     </div>
     <br/>
     <input id="search" type="text" value="lala"/>
-    <input id="submit" type="submit" />
+    <input id="pageToken" type="hidden"/>
+    <input id="submit" type="submit" value="Search"/>
     <label><input id="lucky" type="checkbox" value="akjhaskjh" checked="checked"/> Try with lucky</label>
     <div id="results">
     </div>

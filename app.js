@@ -14,52 +14,58 @@ app.get('/', function (req, res) {
 });
 
 app.get('/watch', function (req, res) {
+    
     var videoId = req.query.id;
+    var youtubeUrl = 'http://www.youtube.com/watch?v=' + videoId;
+    //if is setted, try to recover first the googlevideo internal url (not youtube domain)
+    var tryWithLucky = req.query.lucky !== undefined
+                        && req.query.lucky != "false";
+        
+    // Optional arguments passed to youtube-dl. 
+    var args = ['--format=' + (tryWithLucky ? 'best' : 'worst')];
+    
+    // Additional options can be given for calling `child_process.execFile()`. 
+    var options = { cwd: __dirname };
+                        
     var fs = require('fs');
     var youtubedl = require('youtube-dl');
-    /*var video = youtubedl('http://www.youtube.com/watch?v=' + videoId,
-    // Optional arguments passed to youtube-dl. 
-    ['--format=worstaudio'],
-    // Additional options can be given for calling `child_process.execFile()`. 
-    { cwd: __dirname });*/
     
-    youtubedl.getInfo('http://www.youtube.com/watch?v=' + videoId,
-    // Optional arguments passed to youtube-dl. 
-    ['--format=best'],
-    // Additional options can be given for calling `child_process.execFile()`. 
-    { cwd: __dirname }, function(error, info){
-        console.log(info)
-        res.send("<style>body{margin:0;padding:0}</style>"
-                + "<iframe style='width:100%;height:100%;margin:0' frameborder='0' allowfullscreen='allowfullscreen' "
-                + "src='" + info.url +"'/>");
-        //request(info.url).pipe(res)
-    })
-    
-    // Will be called when the download starts. 
-    /*
-    var file = null;
-    
-    video.on('info', function(info) {
-        console.log('Download started');
-        console.log('filename: ' + info._filename);
-        console.log('size: ' + info.size);
-        console.log('ext: ' + info.ext);
-        if(file === null){
-            file = fs.createWriteStream(videoId+".mp4")
-            video.pipe(file);
-        }
-    });
-    video.on('end', function() {
-        console.log('finished downloading!');
+    if(tryWithLucky){
+        youtubedl.getInfo(youtubeUrl, args, options, 
+            function(error, info){
+                res.send("<style>body{margin:0;padding:0}</style>"
+                        + "<iframe style='width:100%;height:100%;margin:0' frameborder='0' allowfullscreen='allowfullscreen' "
+                        + "src='" + info.url +"'/>");
+            })
+    } else {
+        var video = youtubedl(youtubeUrl, args, options);
         
-        /*res.writeHead(200,{
+        var file = null;
+        
+        // Will be called when the download starts. 
+        video.on('info', function(info) {
+            console.log('Download started');
+            console.log('filename: ' + info._filename);
+            console.log('size: ' + info.size);
+            console.log('ext: ' + info.ext);
+            if(false && file === null){
+                file = fs.createWriteStream(videoId+".mp4")
+                video.pipe(file);
+            }
+        });
+        video.on('end', function() {
+            console.log('finished downloading!');
+            
+            
+            //res.sendFile(file.path, { root: __dirname })
+        });
+    
+        res.writeHead(200,{
             'Content-type': 'video/webm'
-        });*/
-       // res.sendFile(file.path, { root: __dirname })
-    //});
-   
-
-    //video.pipe(res);
+        });
+        video.pipe(res);
+    }
+    
    
 });
 
@@ -67,7 +73,6 @@ app.get('/watch', function (req, res) {
 app.get('/search', function (req, res) {
     var disableReduce = req.query.disableReduce !== undefined
                         && req.query.disableReduce != "false";
-    console.log(req.query.disableReduce);
     youTube.addParam("pageToken", req.query.pageToken)
     youTube.search({ q: req.query.q}, 20, function(error, result) {
     if (error) {
@@ -111,7 +116,8 @@ app.listen(8000, function () {
 
 function reduceSearchJson(json){
     var reduced = {};
-    reduced.nextPage = json.nextPageToken;
+    reduced.prevPageToken = json.prevPageToken;
+    reduced.nextPageToken = json.nextPageToken;
     reduced.items = [];
     for(var i in json.items){
         var oldItem = json.items[i];
