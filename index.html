@@ -5,18 +5,81 @@
     <link rel="stylesheet" href="/resources/demos/style.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <style>
+        .video_title{display:block}
+        video{width:100%!important;height:auto!important;}
+    </style>
     <script>
+            function searchVideos(text){
+                $.ajax({
+                    url: "search",
+                    data: {
+                        q: text
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        $("#results").html("");
+                        for(var i in data.items){
+                            var item = data.items[i];
+                            var elem = $("<a class='video_title'>");
+                            elem.attr("href", "watch?id=" + item.id + ($("#lucky").is(':checked') ? "&lucky" : ""))
+                            elem.attr("target", "video")
+                            elem.html(item.title)
+                            $("#results").append(elem)
+                        }
+                    }
+                })
+            }
+        
         $(function() {
             $("#search").autocomplete({
-                source: [11,22,33]
+                source: function( request, response ) {
+                    $.ajax({
+                        url: "suggest",
+                        //dataType: "jsonp",
+                        data: {
+                            q: request.term
+                        },
+                        success: function( data ) {
+                            // Handle 'no match' indicated by [ "" ] response
+                            response( data.length === 1 && data[ 0 ].length === 0 ? [] : data );
+                        }
+                    });
+                },
+                minLength: 3,
+                select: function( event, ui ) {
+                    console.log( "Selected: " + ui.item.label );
+                    searchVideos(ui.item.label)
+                }
             });
+
+            $("#search").focus()
+            $("#submit").click(function(){
+                searchVideos($("#search").val())
+            })
+            $("#lucky").change(function() {
+                var check = this;
+                $(".video_title").each(function(index){
+                    console.log(this)
+                    this.href = check.checked
+                            ? this.href + "&lucky"
+                            : this.href.replace(/&lucky$/,"");
+                })
+            });
+
         });
     </script>
 </head>
-
 <body>
-   
-    <input id="search" type="text" />
+    <div class="videoWrapper">
+        <iframe name="video" frameborder="0" allowfullscreen="allowfullscreen" height="337" width="600"></iframe>
+    </div>
+    <br/>
+    <input id="search" type="text" value="lala"/>
+    <input id="submit" type="submit" />
+    <label><input id="lucky" type="checkbox" value="akjhaskjh" checked="checked"/> Try with lucky</label>
+    <div id="results">
+    </div>
 </body>
 
 </html>
