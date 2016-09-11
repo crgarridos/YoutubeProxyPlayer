@@ -9,9 +9,9 @@ module.exports = function (youtubeUrl, args, options) {
                 request({method: 'HEAD',url: info.url}, function (error, response, body) {
                     console.log("veryfing lucky")
                     if (!error && response.statusCode == 200) {
-                        var newUrl = info.url.replace("requiressl=yes","requiressl=no")
-                                        .replace(/ip=.*?&/,"ip=&89.158.30.168")
-                                        .replace("requiressl%2C","")
+                        var newUrl = info.url//.replace("requiressl=yes","requiressl=no")
+                                        .replace(/ip=.*?&/,"ip=89.158.30.168&")
+                                        //.replace("requiressl%2C","")
 
                         
                         res.send("<style>body{margin:0;padding:0}</style>"
