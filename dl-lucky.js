@@ -11,6 +11,7 @@ module.exports = function (youtubeUrl, args, options) {
                     if (!error && response.statusCode == 200) {
                         var newUrl = info.url.replace("requiressl=yes","requiressl=no")
                                         .replace(/ip=.*?&/,"ip=&89.158.30.168")
+                                        .replace("requiressl%2C","")
 
                         
                         res.send("<style>body{margin:0;padding:0}</style>"
