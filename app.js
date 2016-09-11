@@ -64,7 +64,7 @@ app.get('/watch', function (req, res) {
 });
 
 
-app.get('/yt/search', function (req, res) {
+app.get('/search', function (req, res) {
     var disableReduce = req.query.disableReduce !== undefined
                         && req.query.disableReduce != "false";
     youTube.addParam("pageToken", req.query.pageToken)
@@ -103,8 +103,8 @@ app.get('/suggest', function (req, res) {
 });
 
 
-app.listen(8000, function () {
-    console.log('Example app listening on port 8000!');
+app.listen(1313, function () {
+    console.log('Example app listening on port 1313!');
     console.log(__dirname);
 });
 
