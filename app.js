@@ -1,8 +1,12 @@
+const PORT = 1313;
+
 var express = require('express');
 var request = require('request');
+var YouTube = require('youtube-node');
+var dl_normal = require('./dl-normal');
+var dl_lucky = require('./dl-lucky');
 var app = express();
 
-var YouTube = require('youtube-node');
 
 var youTube = new YouTube();
 
@@ -15,37 +19,18 @@ app.get('/', function (req, res) {
 });
 
 app.get('/watch', function (req, res) {
-    
     var videoId = req.query.id;
     var youtubeUrl = 'http://www.youtube.com/watch?v=' + videoId;
     //if is setted, try to recover first the googlevideo internal url (not youtube domain)
     var tryWithLucky = req.query.lucky !== undefined
                         && req.query.lucky != "false";
-        
     // Optional arguments passed to youtube-dl. 
     var args = ['--format=' + (tryWithLucky ? 'best' : 'worst')];
-    
     // Additional options can be given for calling `child_process.execFile()`. 
     var options = { cwd: __dirname };
                         
-    var youtubedl = require('youtube-dl');
-    var dl_normal = require('./dl-normal');
-    
     if(tryWithLucky){
-        youtubedl.getInfo(youtubeUrl, args, options, 
-            function(error, info){
-                request({method: 'HEAD',url: info.url}, function (error, response, body) {
-                    console.log("veryfing lucky")
-                    if (!error && response.statusCode == 200) {
-                        res.send("<style>body{margin:0;padding:0}</style>"
-                            + "<iframe style='width:100%;height:100%;margin:0' frameborder='0' allowfullscreen='allowfullscreen' "
-                            + "src='" + info.url +"'/>");
-                    } else {
-                        console.log("bad lucky :(")
-                        dl_normal(youtubeUrl, args, options)(res);
-                    }
-                });
-            })
+        dl_lucky(youtubeUrl, args, options)(res)
     } else {
         dl_normal(youtubeUrl, args, options)(res);
     }
@@ -91,8 +76,8 @@ app.get('/suggest', function (req, res) {
 });
 
 
-app.listen(1313, function () {
-    console.log('Example app listening on port 1313!');
+app.listen(PORT, function () {
+    console.log('Example app listening on port '+PORT+'!');
     console.log(__dirname);
 });
 

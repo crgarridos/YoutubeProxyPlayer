@@ -1,7 +1,7 @@
-module.exports = function(youtubeUrl, args, options) {
+var youtubedl = require('youtube-dl');
     
+module.exports = function(youtubeUrl, args, options) {
     'use strict';
-    var youtubedl = require('youtube-dl');
     var video = youtubedl(youtubeUrl, args, options);
         
         // Will be called when the download starts. 
